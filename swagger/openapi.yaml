@@ -1,0 +1,305 @@
+openapi: 3.1.0
+info:
+  title: Immersive Images
+  version: 1.0.0
+tags:
+  - name: images
+  - name: system
+paths:
+  /images:
+    post:
+      tags: [images]
+      operationId: createImage
+      summary: Create an image
+      description: |
+        Generates an image from the given seed, uploads it to Selectel S3 and
+        returns the stored metadata.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateImageRequest'
+      responses:
+        '201':
+          description: Image created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImageMeta'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+    get:
+      tags: [images]
+      operationId: listImages
+      summary: List images
+      description: Returns a paginated list of images, newest first.
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of items to return.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 50
+        - name: offset
+          in: query
+          description: Number of items to skip.
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Paginated list of images.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListImagesResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /images/{uuid}:
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the image.
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags: [images]
+      operationId: getImage
+      summary: Get image metadata
+      description: Returns metadata of a single image.
+      responses:
+        '200':
+          description: Image metadata.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImageMeta'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      tags: [images]
+      operationId: updateImage
+      summary: Rename an image
+      description: Updates the name of the image.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateImageRequest'
+      responses:
+        '200':
+          description: Updated image metadata.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImageMeta'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+    delete:
+      tags: [images]
+      operationId: deleteImage
+      summary: Delete an image
+      description: Deletes the image from storage.
+      responses:
+        '204':
+          description: Image deleted successfully.
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+  /images/{uuid}/content:
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the image.
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags: [images]
+      operationId: getImageContent
+      summary: Download image file
+      description: |
+        Downloads the image file as PNG. Image content is immutable — it is
+        generated once from the seed and never changes afterwards.
+      responses:
+        '200':
+          description: The image file.
+          headers:
+            Cache-Control:
+              description: |
+                Content never changes, so the file may be cached indefinitely
+                without revalidation.
+              schema:
+                type: string
+                example: 'public, max-age=31536000, immutable'
+            Content-Disposition:
+              description: Suggested download filename.
+              schema:
+                type: string
+                example: 'attachment; filename="my-image.png"'
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /health:
+    get:
+      tags: [system]
+      operationId: health
+      summary: Health check
+      description: Returns service health status.
+      responses:
+        '200':
+          description: Service is healthy.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+components:
+  schemas:
+    ImageMeta:
+      type: object
+      description: |
+        Metadata of a stored image. The seed used for generation is
+        deliberately not exposed.
+      required:
+        - uuid
+        - name
+        - created_at
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          description: Stable identifier of the image.
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Name of the image.
+        created_at:
+          type: string
+          format: date-time
+          description: Creation timestamp in UTC.
+    CreateImageRequest:
+      type: object
+      required:
+        - seed
+        - name
+      properties:
+        seed:
+          type: integer
+          minimum: 0
+          maximum: 4294967295
+          description: |
+            Seed for procedural generation. Stored server-side for possible
+            regeneration, never returned to clients.
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Name of the image.
+    UpdateImageRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: New name of the image.
+    ListImagesResponse:
+      type: object
+      required:
+        - items
+        - total
+        - limit
+        - offset
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImageMeta'
+        total:
+          type: integer
+          minimum: 0
+          description: Total number of images available.
+        limit:
+          type: integer
+          description: Applied page size.
+        offset:
+          type: integer
+          minimum: 0
+          description: Applied offset.
+    Error:
+      type: object
+      description: Uniform error payload.
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - message
+          properties:
+            message:
+              type: string
+              description: Error description.
+  responses:
+    BadRequest:
+      description: The request is malformed or contains invalid values.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: The image with the given UUID does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unavailable:
+      description: Storage or generation service is temporarily unavailable.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InternalServerError:
+      description: Unexpected server error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
