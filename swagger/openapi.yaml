@@ -19,20 +19,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateImageRequest'
+              $ref: 'components.yaml#/components/schemas/CreateImageRequest'
       responses:
         '201':
           description: Image created successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ImageMeta'
+                $ref: 'components.yaml#/components/schemas/ImageMeta'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'components.yaml#/components/responses/BadRequest'
         '500':
-          $ref: '#/components/responses/InternalServerError'
+          $ref: 'components.yaml#/components/responses/InternalServerError'
         '503':
-          $ref: '#/components/responses/Unavailable'
+          $ref: 'components.yaml#/components/responses/Unavailable'
     get:
       tags: [images]
       operationId: listImages
@@ -60,11 +60,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ListImagesResponse'
+                $ref: 'components.yaml#/components/schemas/ListImagesResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'components.yaml#/components/responses/BadRequest'
         '500':
-          $ref: '#/components/responses/InternalServerError'
+          $ref: 'components.yaml#/components/responses/InternalServerError'
   /images/{uuid}:
     parameters:
       - name: uuid
@@ -85,11 +85,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ImageMeta'
+                $ref: 'components.yaml#/components/schemas/ImageMeta'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'components.yaml#/components/responses/NotFound'
         '500':
-          $ref: '#/components/responses/InternalServerError'
+          $ref: 'components.yaml#/components/responses/InternalServerError'
     put:
       tags: [images]
       operationId: updateImage
@@ -100,22 +100,22 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateImageRequest'
+              $ref: 'components.yaml#/components/schemas/UpdateImageRequest'
       responses:
         '200':
           description: Updated image metadata.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ImageMeta'
+                $ref: 'components.yaml#/components/schemas/ImageMeta'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'components.yaml#/components/responses/BadRequest'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'components.yaml#/components/responses/NotFound'
         '500':
-          $ref: '#/components/responses/InternalServerError'
+          $ref: 'components.yaml#/components/responses/InternalServerError'
         '503':
-          $ref: '#/components/responses/Unavailable'
+          $ref: 'components.yaml#/components/responses/Unavailable'
     delete:
       tags: [images]
       operationId: deleteImage
@@ -125,11 +125,11 @@ paths:
         '204':
           description: Image deleted successfully.
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'components.yaml#/components/responses/NotFound'
         '500':
-          $ref: '#/components/responses/InternalServerError'
+          $ref: 'components.yaml#/components/responses/InternalServerError'
         '503':
-          $ref: '#/components/responses/Unavailable'
+          $ref: 'components.yaml#/components/responses/Unavailable'
   /images/{uuid}/content:
     parameters:
       - name: uuid
@@ -168,9 +168,9 @@ paths:
                 type: string
                 format: binary
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'components.yaml#/components/responses/NotFound'
         '500':
-          $ref: '#/components/responses/InternalServerError'
+          $ref: 'components.yaml#/components/responses/InternalServerError'
   /health:
     get:
       tags: [system]
@@ -188,118 +188,3 @@ paths:
                   status:
                     type: string
                     example: ok
-components:
-  schemas:
-    ImageMeta:
-      type: object
-      description: |
-        Metadata of a stored image. The seed used for generation is
-        deliberately not exposed.
-      required:
-        - uuid
-        - name
-        - created_at
-      properties:
-        uuid:
-          type: string
-          format: uuid
-          description: Stable identifier of the image.
-        name:
-          type: string
-          minLength: 1
-          maxLength: 255
-          description: Name of the image.
-        created_at:
-          type: string
-          format: date-time
-          description: Creation timestamp in UTC.
-    CreateImageRequest:
-      type: object
-      required:
-        - seed
-        - name
-      properties:
-        seed:
-          type: integer
-          minimum: 0
-          maximum: 4294967295
-          description: |
-            Seed for procedural generation. Stored server-side for possible
-            regeneration, never returned to clients.
-        name:
-          type: string
-          minLength: 1
-          maxLength: 255
-          description: Name of the image.
-    UpdateImageRequest:
-      type: object
-      required:
-        - name
-      properties:
-        name:
-          type: string
-          minLength: 1
-          maxLength: 255
-          description: New name of the image.
-    ListImagesResponse:
-      type: object
-      required:
-        - items
-        - total
-        - limit
-        - offset
-      properties:
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/ImageMeta'
-        total:
-          type: integer
-          minimum: 0
-          description: Total number of images available.
-        limit:
-          type: integer
-          description: Applied page size.
-        offset:
-          type: integer
-          minimum: 0
-          description: Applied offset.
-    Error:
-      type: object
-      description: Uniform error payload.
-      required:
-        - error
-      properties:
-        error:
-          type: object
-          required:
-            - message
-          properties:
-            message:
-              type: string
-              description: Error description.
-  responses:
-    BadRequest:
-      description: The request is malformed or contains invalid values.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    NotFound:
-      description: The image with the given UUID does not exist.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    Unavailable:
-      description: Storage or generation service is temporarily unavailable.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    InternalServerError:
-      description: Unexpected server error.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'

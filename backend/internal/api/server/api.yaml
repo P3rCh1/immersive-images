@@ -1,0 +1,7 @@
+package: server
+output: server.gen.go
+generate:
+  models: true
+  chi-server: true
+import-mapping:
+  components.yaml: github.com/P3rCh1/immersive-images/backend/internal/api/models
