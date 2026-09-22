@@ -14,5 +14,8 @@ oapi-codegen:
 golangci-lint:
 	go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.13.2 run
 
+unit-tests:
+	go test ./...
+
 golangci-lint-fix:
 	go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.13.2 run --fix
