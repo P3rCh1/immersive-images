@@ -1,10 +1,16 @@
 module github.com/P3rCh1/immersive-images/backend
 
-go 1.25.7
+go 1.27.1
+
+require github.com/ilyakaznacheev/cleanenv v1.5.0
 
 require (
+	github.com/BurntSushi/toml v1.3.2 // indirect
 	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
 	github.com/go-chi/chi/v5 v5.3.2 // indirect
 	github.com/google/uuid v1.6.0 // indirect
+	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/oapi-codegen/runtime v1.7.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
+	olympos.io/encoding/edn v0.0.0-20201019073823-d3554ca0b0a3 // indirect
 )
