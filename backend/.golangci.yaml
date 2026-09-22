@@ -1,0 +1,18 @@
+version: "2"
+
+formatters:
+  enable:
+    - gofmt
+    - gofumpt
+
+linters:
+  default: standard
+  enable:
+    - revive
+    - gosec
+
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - std-error-handling
