@@ -14,3 +14,9 @@ db:
   host: postgres
   port: 5432
   name: images
+
+s3:
+  endpoint: 'https://s3.ru-3.storage.selcloud.ru'
+  port: 443
+  region: 'ru-3'
+  bucket: 'immersive-images'

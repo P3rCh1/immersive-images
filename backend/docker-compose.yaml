@@ -19,7 +19,9 @@ services:
     networks:
       - default
     environment:
-      PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      AWS_ACCESS_KEY: ${AWS_ACCESS_KEY}
+      AWS_SECRET_KEY: ${AWS_SECRET_KEY}
     ports:
       - "8080:8080"
     depends_on:
