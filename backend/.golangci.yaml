@@ -10,6 +10,11 @@ linters:
   enable:
     - revive
     - gosec
+  settings:
+    revive:
+      rules:
+        - name: blank-imports
+          disabled: true
 
   exclusions:
     generated: lax

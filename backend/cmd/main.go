@@ -14,6 +14,7 @@ import (
 	"github.com/P3rCh1/immersive-images/backend/internal/api/handlers"
 	"github.com/P3rCh1/immersive-images/backend/internal/api/server"
 	"github.com/P3rCh1/immersive-images/backend/internal/config"
+	"github.com/P3rCh1/immersive-images/backend/internal/dal/postgres"
 	"github.com/P3rCh1/immersive-images/backend/internal/logger"
 	"github.com/go-chi/chi/v5"
 )
@@ -43,7 +44,12 @@ func main() {
 }
 
 func run(log *slog.Logger) error {
-	apiHandlers := handlers.New(log)
+	db, err := postgres.New(log)
+	if err != nil {
+		return err
+	}
+
+	apiHandlers := handlers.New(log, db)
 
 	router := chi.NewRouter()
 
