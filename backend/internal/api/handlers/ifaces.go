@@ -1,4 +1,3 @@
 package handlers
 
-type DB interface {
-}
+type DB interface{}
