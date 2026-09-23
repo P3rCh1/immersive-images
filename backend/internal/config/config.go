@@ -10,6 +10,7 @@ var Config struct {
 	Logger Logger `yaml:"logger"`
 	DB     DB     `yaml:"db"`
 	Server Server `yaml:"server"`
+	S3     S3     `yaml:"s3"`
 }
 
 func InitConfig(path string) error {
@@ -37,5 +38,15 @@ type DB struct {
 	Port string `yaml:"port" env-default:"5432"`
 	Name string `yaml:"name" env-default:"postgres"`
 
-	Password string `yaml:"-" env:"PASSWORD" validate:"required"`
+	Password string `yaml:"-" env:"POSTGRES_PASSWORD" validate:"required"`
+}
+
+type S3 struct {
+	Endpoint string `yaml:"endpoint" env-default:"https://s3.ru-3.storage.selcloud.ru"`
+	Port     string `yaml:"port"     env-default:"443"`
+	Region   string `yaml:"region"   env-default:"ru-3"`
+	Bucket   string `yaml:"bucket"   env-default:"immersive-images"`
+
+	AccessKey string `yaml:"-" env:"AWS_ACCESS_KEY" validate:"required"`
+	SecretKey string `yaml:"-" env:"AWS_SECRET_KEY" validate:"required"`
 }
