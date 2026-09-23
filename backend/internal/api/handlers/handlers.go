@@ -12,11 +12,13 @@ import (
 
 type Handlers struct {
 	log *slog.Logger
+	db  DB
 }
 
-func New(log *slog.Logger) *Handlers {
+func New(log *slog.Logger, db DB) *Handlers {
 	return &Handlers{
 		log: log,
+		db:  db,
 	}
 }
 

@@ -1,6 +1,6 @@
 OAPI_CODEGEN_VERSION = v2.8.0
 
-.PHONY: oapi-codegen
+.PHONY: oapi-codegen golangci-lint unit-tests golangci-lint-fix migrate
 
 oapi-codegen:
 	cd internal/api/models && \
@@ -19,3 +19,6 @@ unit-tests:
 
 golangci-lint-fix:
 	go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.13.2 run --fix
+
+migrate:
+	docker compose exec debug sql-migrate up
