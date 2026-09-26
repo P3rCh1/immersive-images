@@ -7,11 +7,14 @@ components:
     ImageMeta:
       type: object
       description: |
-        Metadata of a stored image.
+        Metadata of a stored image, including the resolved generation
+        parameters it was rendered with.
       required:
         - uuid
         - name
         - created_at
+        - seed
+        - settings
       properties:
         uuid:
           type: string
@@ -26,6 +29,86 @@ components:
           type: string
           format: date-time
           description: Creation timestamp in UTC.
+        seed:
+          type: integer
+          description: Seed the image was generated from.
+        settings:
+          $ref: '#/components/schemas/GenerationSettingsResponse'
+          description: Image generation settings
+    Geometry:
+      type: string
+      enum:
+        - PATCHES
+        - SPOTS
+        - RINGS
+        - TERRACES
+        - WAVES
+        - MOTTLED
+      description: Image forms.
+    Palette:
+      type: string
+      enum:
+        - NEON
+        - DARK
+        - TOXIC
+        - RAINBOW
+        - OCEAN
+        - LAVA
+        - MONO
+      description: Image color style.
+    Additional:
+      type: string
+      enum:
+        - PIXEL
+        - BLUR
+      nullable: true
+      description: Optional post-processing effect.
+    GenerationSettingsRequest:
+      type: object
+      description: Generation parameters for a create request
+      properties:
+        style:
+          $ref: '#/components/schemas/Geometry'
+        palette:
+          $ref: '#/components/schemas/Palette'
+        additional:
+          $ref: '#/components/schemas/Additional'
+        width:
+          type: integer
+          description: Output width in pixels.
+        height:
+          type: integer
+          description: Output height in pixels.
+        scale:
+          type: number
+          format: double
+          description: Zoom level of the underlying noise field.
+    GenerationSettingsResponse:
+      type: object
+      description: Image generation parameters
+      required:
+        - style
+        - palette
+        - width
+        - height
+        - scale
+      properties:
+        style:
+          $ref: '#/components/schemas/Geometry'
+        palette:
+          $ref: '#/components/schemas/Palette'
+        additional:
+          $ref: '#/components/schemas/Additional'
+        width:
+          type: integer
+          description: Output width in pixels.
+        height:
+          type: integer
+          description: Output height in pixels.
+        scale:
+          type: number
+          format: double
+          description: Zoom level of the underlying noise field.
     CreateImageRequest:
       type: object
       required:
@@ -34,15 +117,15 @@ components:
       properties:
         seed:
           type: integer
-          minimum: 0
-          maximum: 4294967295
-          description: |
-            Seed for procedural generation.
+          description: Seed for procedural generation.
         name:
           type: string
           minLength: 1
           maxLength: 255
           description: Name of the image.
+        settings:
+          $ref: '#/components/schemas/GenerationSettingsRequest'
+          description: Generation settings.
     UpdateImageRequest:
       type: object
       required:
@@ -59,7 +142,6 @@ components:
         - items
         - total
         - limit
-        - offset
       properties:
         items:
           type: array
@@ -72,10 +154,10 @@ components:
         limit:
           type: integer
           description: Applied page size.
-        offset:
-          type: integer
-          minimum: 0
-          description: Applied offset.
+        next:
+          type: string
+          format: uuid
+          description: Next start.
     Error:
       type: object
       description: Uniform error payload.

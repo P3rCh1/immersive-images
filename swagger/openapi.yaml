@@ -45,15 +45,12 @@ paths:
           schema:
             type: integer
             minimum: 1
-            maximum: 500
-            default: 50
-        - name: offset
+        - name: start
           in: query
-          description: Number of items to skip.
+          description: UUID of the first image to collect.
           schema:
-            type: integer
-            minimum: 0
-            default: 0
+            type: string
+            format: uuid
       responses:
         '200':
           description: Paginated list of images.
@@ -161,7 +158,7 @@ paths:
               description: Suggested download filename.
               schema:
                 type: string
-                example: 'attachment; filename="my-image.png"'
+                example: 'inline; filename="my-image.png"'
           content:
             image/png:
               schema:
@@ -171,10 +168,10 @@ paths:
           $ref: 'components.yaml#/components/responses/NotFound'
         '500':
           $ref: 'components.yaml#/components/responses/InternalServerError'
-  /health:
+  /healthz:
     get:
       tags: [system]
-      operationId: health
+      operationId: healthz
       summary: Health check
       description: Returns service health status.
       responses:
