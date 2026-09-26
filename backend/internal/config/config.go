@@ -11,6 +11,7 @@ var Config struct {
 	DB     DB     `yaml:"db"`
 	Server Server `yaml:"server"`
 	S3     S3     `yaml:"s3"`
+	Images Images `yaml:"images"`
 }
 
 func InitConfig(path string) error {
@@ -49,4 +50,23 @@ type S3 struct {
 
 	AccessKey string `yaml:"-" env:"AWS_ACCESS_KEY" validate:"required"`
 	SecretKey string `yaml:"-" env:"AWS_SECRET_KEY" validate:"required"`
+}
+
+type Images struct {
+	DefaultLimit int `yaml:"default_limit" env-default:"10"`
+	MaxLimit     int `yaml:"max_limit"     env-default:"100"`
+
+	DefaultStyle   string `yaml:"default_style"   env-default:"PATCHES"`
+	DefaultPalette string `yaml:"default_palette" env-default:"NEON"`
+
+	DefaultWidth  int `yaml:"default_width"  env-default:"256"`
+	DefaultHeight int `yaml:"default_height" env-default:"256"`
+	MinWidth      int `yaml:"min_width"      env-default:"64"`
+	MaxWidth      int `yaml:"max_width"      env-default:"1024"`
+	MinHeight     int `yaml:"min_height"     env-default:"64"`
+	MaxHeight     int `yaml:"max_height"     env-default:"1024"`
+
+	DefaultScale float64 `yaml:"default_scale" env-default:"3"`
+	MinScale     float64 `yaml:"min_scale"     env-default:"0.5"`
+	MaxScale     float64 `yaml:"max_scale"     env-default:"10"`
 }

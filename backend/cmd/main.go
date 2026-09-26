@@ -49,6 +49,7 @@ func run(log *slog.Logger) error {
 	if err != nil {
 		return err
 	}
+	defer db.Close()
 
 	s3 := object.New(log)
 

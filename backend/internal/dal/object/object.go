@@ -1,6 +1,10 @@
 package object
 
 import (
+	"bytes"
+	"context"
+	"fmt"
+	"io"
 	"log/slog"
 
 	"github.com/P3rCh1/immersive-images/backend/internal/config"
@@ -28,4 +32,52 @@ func New(log *slog.Logger) *S3 {
 		}),
 		log: log,
 	}
+}
+
+func (s *S3) Upload(ctx context.Context, key string, data []byte) error {
+	_, err := s.client.PutObject(ctx, &s3.PutObjectInput{
+		Bucket:      aws.String(config.Config.S3.Bucket),
+		Key:         aws.String(key),
+		Body:        bytes.NewReader(data),
+		ContentType: aws.String("image/png"),
+	})
+	if err != nil {
+		s.log.Error(
+			"failed to upload object to S3",
+			"error", err,
+		)
+
+		return fmt.Errorf("failed to upload object to S3: %w", err)
+	}
+
+	return nil
+}
+
+func (s *S3) Get(ctx context.Context, key string) ([]byte, error) {
+	obj, err := s.client.GetObject(ctx, &s3.GetObjectInput{
+		Bucket: aws.String(config.Config.S3.Bucket),
+		Key:    aws.String(key),
+	})
+	if err != nil {
+		s.log.Error(
+			"failed to get object from S3",
+			"error", err,
+		)
+
+		return nil, fmt.Errorf("failed to get object from S3: %w", err)
+	}
+
+	defer obj.Body.Close()
+
+	data, err := io.ReadAll(obj.Body)
+	if err != nil {
+		s.log.Error(
+			"failed to read object data",
+			"error", err,
+		)
+
+		return nil, fmt.Errorf("failed to read object data: %w", err)
+	}
+
+	return data, nil
 }
