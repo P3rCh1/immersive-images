@@ -19,8 +19,8 @@ type ListImagesParams struct {
 	// Limit Maximum number of items to return.
 	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
 
-	// Offset Number of items to skip.
-	Offset *int `form:"offset,omitempty" json:"offset,omitempty"`
+	// Start UUID of the first image to collect.
+	Start *openapi_types.UUID `form:"start,omitempty" json:"start,omitempty"`
 }
 
 // CreateImageJSONRequestBody defines body for CreateImage for application/json ContentType.
@@ -31,9 +31,9 @@ type UpdateImageJSONRequestBody = externalRef0.UpdateImageRequest
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
-	// Health Health check
-	// (GET /health)
-	Health(w http.ResponseWriter, r *http.Request)
+	// Healthz Health check
+	// (GET /healthz)
+	Healthz(w http.ResponseWriter, r *http.Request)
 	// ListImages List images
 	// (GET /images)
 	ListImages(w http.ResponseWriter, r *http.Request, params ListImagesParams)
@@ -58,9 +58,9 @@ type ServerInterface interface {
 
 type Unimplemented struct{}
 
-// Health Health check
-// (GET /health)
-func (_ Unimplemented) Health(w http.ResponseWriter, r *http.Request) {
+// Healthz Health check
+// (GET /healthz)
+func (_ Unimplemented) Healthz(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -109,11 +109,11 @@ type ServerInterfaceWrapper struct {
 
 type MiddlewareFunc func(http.Handler) http.Handler
 
-// Health operation middleware
-func (siw *ServerInterfaceWrapper) Health(w http.ResponseWriter, r *http.Request) {
+// Healthz operation middleware
+func (siw *ServerInterfaceWrapper) Healthz(w http.ResponseWriter, r *http.Request) {
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.Health(w, r)
+		siw.Handler.Healthz(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -145,15 +145,15 @@ func (siw *ServerInterfaceWrapper) ListImages(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	// ------------- Optional query parameter "offset" -------------
+	// ------------- Optional query parameter "start" -------------
 
-	err = runtime.BindQueryParameterWithOptions("form", true, false, "offset", r.URL.Query(), &params.Offset, runtime.BindQueryParameterOptions{Type: "integer", Format: ""})
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "start", r.URL.Query(), &params.Start, runtime.BindQueryParameterOptions{Type: "string", Format: "uuid"})
 	if err != nil {
 		var requiredError *runtime.RequiredParameterError
 		if errors.As(err, &requiredError) {
-			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "offset"})
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "start"})
 		} else {
-			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "offset", Err: err})
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "start", Err: err})
 		}
 		return
 	}
@@ -419,7 +419,7 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Get(options.BaseURL+"/images/{uuid}/content", wrapper.GetImageContent)
 	})
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/health", wrapper.Health)
+		r.Get(options.BaseURL+"/healthz", wrapper.Healthz)
 	})
 
 	return r

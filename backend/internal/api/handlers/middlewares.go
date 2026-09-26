@@ -3,7 +3,7 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/P3rCh1/immersive-images/backend/internal/api/errs"
+	"github.com/P3rCh1/immersive-images/backend/internal/api/msgs"
 	"github.com/P3rCh1/immersive-images/backend/internal/api/server"
 )
 
@@ -16,7 +16,7 @@ func (h *Handlers) Recover() server.MiddlewareFunc {
 						"recovered",
 						"error", err,
 					)
-					h.errorResponse(w, http.StatusInternalServerError, errs.ErrorInternal)
+					h.Error(w, http.StatusInternalServerError, msgs.Internal)
 				}
 			}()
 

@@ -9,14 +9,102 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
+// Defines values for Additional.
+const (
+	BLUR  Additional = "BLUR"
+	PIXEL Additional = "PIXEL"
+)
+
+// Valid indicates whether the value is a known member of the Additional enum.
+func (e Additional) Valid() bool {
+	switch e {
+	case BLUR:
+		return true
+	case PIXEL:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for Geometry.
+const (
+	MOTTLED  Geometry = "MOTTLED"
+	PATCHES  Geometry = "PATCHES"
+	RINGS    Geometry = "RINGS"
+	SPOTS    Geometry = "SPOTS"
+	TERRACES Geometry = "TERRACES"
+	WAVES    Geometry = "WAVES"
+)
+
+// Valid indicates whether the value is a known member of the Geometry enum.
+func (e Geometry) Valid() bool {
+	switch e {
+	case MOTTLED:
+		return true
+	case PATCHES:
+		return true
+	case RINGS:
+		return true
+	case SPOTS:
+		return true
+	case TERRACES:
+		return true
+	case WAVES:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for Palette.
+const (
+	DARK    Palette = "DARK"
+	LAVA    Palette = "LAVA"
+	MONO    Palette = "MONO"
+	NEON    Palette = "NEON"
+	OCEAN   Palette = "OCEAN"
+	RAINBOW Palette = "RAINBOW"
+	TOXIC   Palette = "TOXIC"
+)
+
+// Valid indicates whether the value is a known member of the Palette enum.
+func (e Palette) Valid() bool {
+	switch e {
+	case DARK:
+		return true
+	case LAVA:
+		return true
+	case MONO:
+		return true
+	case NEON:
+		return true
+	case OCEAN:
+		return true
+	case RAINBOW:
+		return true
+	case TOXIC:
+		return true
+	default:
+		return false
+	}
+}
+
+// Additional Optional post-processing effect.
+type Additional string
+
 // CreateImageRequest defines model for CreateImageRequest.
 type CreateImageRequest struct {
 	// Name Name of the image.
 	Name string `json:"name"`
 
-	// Seed Seed for procedural generation. Stored server-side for possible
-	// regeneration, never returned to clients.
+	// Seed Seed for procedural generation. Folded onto the generator's 32-bit
+	// seed space, so seeds differing by a multiple of 2^32 give the same
+	// image.
 	Seed int `json:"seed"`
+
+	// Settings Generation settings.
+	Settings *GenerationSettingsRequest `json:"settings,omitempty"`
 }
 
 // Error Uniform error payload.
@@ -27,14 +115,67 @@ type Error struct {
 	} `json:"error"`
 }
 
-// ImageMeta Metadata of a stored image. The seed used for generation is
-// deliberately not exposed.
+// GenerationSettingsRequest Generation parameters for a create request
+type GenerationSettingsRequest struct {
+	// Additional Optional post-processing effect.
+	Additional *Additional `json:"additional,omitempty"`
+
+	// Height Output height in pixels.
+	Height *int `json:"height,omitempty"`
+
+	// Palette Image color style.
+	Palette *Palette `json:"palette,omitempty"`
+
+	// Scale Zoom level of the underlying noise field.
+	Scale *float64 `json:"scale,omitempty"`
+
+	// Style Image forms.
+	Style *Geometry `json:"style,omitempty"`
+
+	// Width Output width in pixels.
+	Width *int `json:"width,omitempty"`
+}
+
+// GenerationSettingsResponse Image generation parameters
+type GenerationSettingsResponse struct {
+	// Additional Optional post-processing effect.
+	Additional *Additional `json:"additional,omitempty"`
+
+	// Height Output height in pixels.
+	Height int `json:"height"`
+
+	// Palette Image color style.
+	Palette Palette `json:"palette"`
+
+	// Scale Zoom level of the underlying noise field.
+	Scale float64 `json:"scale"`
+
+	// Style Image forms.
+	Style Geometry `json:"style"`
+
+	// Width Output width in pixels.
+	Width int `json:"width"`
+}
+
+// Geometry Image forms.
+type Geometry string
+
+// ImageMeta Metadata of a stored image, including the resolved generation
+// parameters it was rendered with.
 type ImageMeta struct {
 	// CreatedAt Creation timestamp in UTC.
 	CreatedAt time.Time `json:"created_at"`
 
 	// Name Name of the image.
 	Name string `json:"name"`
+
+	// Seed Seed the image was generated from. Folded onto the generator's
+	// 32-bit seed space, so seeds differing by a multiple of 2^32 give
+	// the same image.
+	Seed int `json:"seed"`
+
+	// Settings Image generation settings
+	Settings GenerationSettingsResponse `json:"settings"`
 
 	// Uuid Stable identifier of the image.
 	Uuid openapi_types.UUID `json:"uuid"`
@@ -47,12 +188,15 @@ type ListImagesResponse struct {
 	// Limit Applied page size.
 	Limit int `json:"limit"`
 
-	// Offset Applied offset.
-	Offset int `json:"offset"`
+	// Next Next start.
+	Next *openapi_types.UUID `json:"next,omitempty"`
 
 	// Total Total number of images available.
 	Total int `json:"total"`
 }
+
+// Palette Image color style.
+type Palette string
 
 // UpdateImageRequest defines model for UpdateImageRequest.
 type UpdateImageRequest struct {

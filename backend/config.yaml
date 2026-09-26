@@ -20,3 +20,18 @@ s3:
   port: 443
   region: 'ru-3'
   bucket: 'immersive-images'
+
+images:
+  default_limit: 10
+  max_limit: 100
+  default_style: PATCHES
+  default_palette: NEON
+  default_width: 256
+  default_height: 256
+  min_width: 64
+  max_width: 1024
+  min_height: 64
+  max_height: 1024
+  default_scale: 3
+  min_scale: 0.5
+  max_scale: 10
