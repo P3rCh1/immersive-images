@@ -6,9 +6,7 @@ components:
   schemas:
     ImageMeta:
       type: object
-      description: |
-        Metadata of a stored image, including the resolved generation
-        parameters it was rendered with.
+      description: Metadata of a stored image.
       required:
         - uuid
         - name
