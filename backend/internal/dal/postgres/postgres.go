@@ -191,19 +191,36 @@ func (p *Postgres) GetImage(ctx context.Context, id uuid.UUID) (*Image, error) {
 func (p *Postgres) UpdateImage(ctx context.Context, image *Image) error {
 	const query = `
 		UPDATE images
-		SET name = :name
-		WHERE id = :id AND uploaded
+		SET name = $2
+		WHERE id = $1 AND uploaded
+		RETURNING
+			id,
+			name,
+			size,
+			seed,
+			style,
+			palette,
+			additional,
+			width,
+			height,
+			scale,
+			uploaded,
+			created_at
 	`
 
-	handler := p.db.NamedExecContext
+	handler := p.db.GetContext
 
 	tx, ok := ctx.Value(txCtxValueKey).(*sqlx.Tx)
 	if ok {
-		handler = tx.NamedExecContext
+		handler = tx.GetContext
 	}
 
-	result, err := handler(ctx, query, image)
-	if err != nil {
+	var tempImage Image
+	if err := handler(ctx, &tempImage, query, image.ID, image.Name); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return ErrNotFound
+		}
+
 		p.log.Error(
 			"failed to update image name in DB",
 			"error", err,
@@ -212,19 +229,7 @@ func (p *Postgres) UpdateImage(ctx context.Context, image *Image) error {
 		return fmt.Errorf("failed to update image name in DB: %w", err)
 	}
 
-	affected, err := result.RowsAffected()
-	if err != nil {
-		p.log.Error(
-			"failed to get affected rows",
-			"error", err,
-		)
-
-		return fmt.Errorf("failed to get affected rows: %w", err)
-	}
-
-	if affected == 0 {
-		return ErrNotFound
-	}
+	*image = tempImage
 
 	return nil
 }
@@ -270,7 +275,7 @@ func (p *Postgres) SetUploaded(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-func (p *Postgres) DeleteImage(ctx context.Context, id uuid.UUID) error {
+func (p *Postgres) DeleteImageForce(ctx context.Context, id uuid.UUID) error {
 	const query = `
 		DELETE FROM images
 		WHERE id = $1
@@ -290,6 +295,46 @@ func (p *Postgres) DeleteImage(ctx context.Context, id uuid.UUID) error {
 		)
 
 		return fmt.Errorf("failed to delete image from DB: %w", err)
+	}
+
+	return nil
+}
+
+func (p *Postgres) DeleteImage(ctx context.Context, id uuid.UUID) error {
+	const query = `
+		DELETE FROM images
+		WHERE id = $1 AND uploaded
+	`
+
+	handler := p.db.ExecContext
+
+	tx, ok := ctx.Value(txCtxValueKey).(*sqlx.Tx)
+	if ok {
+		handler = tx.ExecContext
+	}
+
+	result, err := handler(ctx, query, id)
+	if err != nil {
+		p.log.Error(
+			"failed to delete image from DB",
+			"error", err,
+		)
+
+		return fmt.Errorf("failed to delete image from DB: %w", err)
+	}
+
+	affected, err := result.RowsAffected()
+	if err != nil {
+		p.log.Error(
+			"failed to get affected rows",
+			"error", err,
+		)
+
+		return fmt.Errorf("failed to get affected rows: %w", err)
+	}
+
+	if affected == 0 {
+		return ErrNotFound
 	}
 
 	return nil

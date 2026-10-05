@@ -51,7 +51,7 @@ func (h *Handlers) CreateImage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.s3.Upload(r.Context(), img.ID.String(), data); err != nil {
-		if delErr := h.db.DeleteImage(r.Context(), img.ID); delErr != nil {
+		if delErr := h.db.DeleteImageForce(r.Context(), img.ID); delErr != nil {
 			h.log.Error(
 				"failed to delete image after S3 upload failure",
 				"need_cleanup", "DB",
@@ -80,7 +80,7 @@ func (h *Handlers) CreateImage(w http.ResponseWriter, r *http.Request) {
 }
 
 func getGeneratorConfig(req models.CreateImageRequest) (generator.Config, error) {
-	if len(req.Name) < 1 || len(req.Name) > maxImageNameLen {
+	if len(req.Name) == 0 || len(req.Name) > maxImageNameLen {
 		return generator.Config{}, fmt.Errorf(
 			msgs.InvalidNameLenFmt,
 			len(req.Name), 1, maxImageNameLen,

@@ -13,7 +13,6 @@ import (
 	"github.com/P3rCh1/immersive-images/backend/internal/common"
 	"github.com/P3rCh1/immersive-images/backend/internal/dal/postgres"
 	"github.com/google/uuid"
-	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
 type Handlers struct {
@@ -43,11 +42,13 @@ type DB interface {
 	UpdateImage(ctx context.Context, image *postgres.Image) error
 	SetUploaded(ctx context.Context, id uuid.UUID) error
 	DeleteImage(ctx context.Context, id uuid.UUID) error
+	DeleteImageForce(ctx context.Context, id uuid.UUID) error
 }
 
 type S3 interface {
 	Upload(ctx context.Context, objectKey string, data []byte) error
 	Get(ctx context.Context, key string) ([]byte, error)
+	Delete(ctx context.Context, key string) error
 }
 
 func (h *Handlers) JSON(w http.ResponseWriter, statusCode int, v any) {
@@ -117,19 +118,4 @@ func (h *Handlers) Healthz(w http.ResponseWriter, _ *http.Request) {
 
 func (h *Handlers) ValidationErrorHandler(w http.ResponseWriter, _ *http.Request, err error) {
 	h.Error(w, http.StatusBadRequest, err.Error())
-}
-
-func (h *Handlers) DeleteImage(w http.ResponseWriter, _ *http.Request, _ openapi_types.UUID) {
-	w.WriteHeader(http.StatusTeapot)
-	fmt.Fprintln(w, "Unimplemented")
-}
-
-func (h *Handlers) GetImage(w http.ResponseWriter, _ *http.Request, _ openapi_types.UUID) {
-	w.WriteHeader(http.StatusTeapot)
-	fmt.Fprintln(w, "Unimplemented")
-}
-
-func (h *Handlers) UpdateImage(w http.ResponseWriter, _ *http.Request, _ openapi_types.UUID) {
-	w.WriteHeader(http.StatusTeapot)
-	fmt.Fprintln(w, "Unimplemented")
 }
