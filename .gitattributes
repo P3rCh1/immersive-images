@@ -1,0 +1,3 @@
+backend/vendor/** linguist-generated
+backend/vendor/** -gitignore
+*.gen.go linguist-generated
