@@ -2,15 +2,16 @@ FROM golang:1.27.1-trixie AS builder
 
 WORKDIR /app
 
+ENV CGO_ENABLED=0
+
 COPY go.mod .
 COPY go.sum .
-
-RUN go mod download
+COPY vendor ./vendor
 
 COPY cmd ./cmd
 COPY internal ./internal
 
-RUN CGO_ENABLED=0 go build -o /bin/main ./cmd/main.go
+RUN go build -o /bin/main ./cmd/main.go
 
 FROM alpine:3.24.2
 

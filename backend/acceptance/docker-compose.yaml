@@ -1,0 +1,33 @@
+services:
+  tests:
+    build:
+      context: ..
+      dockerfile: acceptance/Dockerfile
+    restart: no
+    networks:
+      - acceptance
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:18
+    restart: no
+    networks:
+      - acceptance
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: images
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+networks:
+  acceptance:
+    name: immersive-images-acceptance
+    driver: bridge
