@@ -51,7 +51,7 @@ type S3 interface {
 	Delete(ctx context.Context, key string) error
 }
 
-func (h *Handlers) JSON(w http.ResponseWriter, statusCode int, v any) {
+func (h *Handlers) JSON[T any](w http.ResponseWriter, statusCode int, v *T) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
 	if err := json.MarshalWrite(w, v, json.DefaultOptionsV2()); err != nil {
@@ -87,7 +87,7 @@ func (h *Handlers) Error(w http.ResponseWriter, statusCode int, errMsg string) {
 		},
 	}
 
-	h.JSON(w, statusCode, apiError)
+	h.JSON(w, statusCode, &apiError)
 }
 
 func apiImageMetaFromDB(img postgres.Image) models.ImageMeta {

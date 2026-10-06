@@ -8,6 +8,7 @@ import (
 
 	"github.com/P3rCh1/immersive-images/backend/internal/api/models"
 	"github.com/P3rCh1/immersive-images/backend/internal/api/msgs"
+	"github.com/P3rCh1/immersive-images/backend/internal/common"
 	"github.com/P3rCh1/immersive-images/backend/internal/dal/postgres"
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
@@ -49,5 +50,5 @@ func (h *Handlers) UpdateImage(w http.ResponseWriter, r *http.Request, id openap
 		return
 	}
 
-	h.JSON(w, http.StatusOK, apiImageMetaFromDB(img))
+	h.JSON(w, http.StatusOK, common.Ptr(apiImageMetaFromDB(img)))
 }

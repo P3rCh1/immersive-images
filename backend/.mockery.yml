@@ -1,0 +1,10 @@
+all: true
+dir: '{{ .InterfaceDir }}/mocks'
+pkgname: '{{ .SrcPackageName }}_mocks'
+filename: '{{ .InterfaceName | lower }}.go'
+recursive: true
+template: testify
+packages:
+  github.com/P3rCh1/immersive-images/backend:
+    config:
+      all: true
