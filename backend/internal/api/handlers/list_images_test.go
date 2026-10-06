@@ -58,7 +58,7 @@ func TestListImages_Internal(t *testing.T) {
 	handlers := New(slog.New(slog.DiscardHandler), db, nil)
 	rec := httptest.NewRecorder()
 
-	db.EXPECT().BeginTxx(mock.Anything, mock.Anything).Return(nil, errors.New("internal"))
+	db.EXPECT().BeginTxx(mock.Anything, mock.Anything).Return(context.Background(), errors.New("internal"))
 
 	handlers.ListImages(rec, httptest.NewRequest(http.MethodGet, "/", nil), server.ListImagesParams{})
 
