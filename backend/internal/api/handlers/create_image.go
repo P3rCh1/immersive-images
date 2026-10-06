@@ -8,6 +8,7 @@ import (
 
 	"github.com/P3rCh1/immersive-images/backend/internal/api/models"
 	"github.com/P3rCh1/immersive-images/backend/internal/api/msgs"
+	"github.com/P3rCh1/immersive-images/backend/internal/common"
 	"github.com/P3rCh1/immersive-images/backend/internal/config"
 	"github.com/P3rCh1/immersive-images/backend/internal/dal/postgres"
 	"github.com/P3rCh1/immersive-images/backend/internal/generator"
@@ -76,7 +77,7 @@ func (h *Handlers) CreateImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.JSON(w, http.StatusCreated, apiImageMetaFromDB(img))
+	h.JSON(w, http.StatusCreated, common.Ptr(apiImageMetaFromDB(img)))
 }
 
 func getGeneratorConfig(req models.CreateImageRequest) (generator.Config, error) {
