@@ -1,6 +1,7 @@
 #ifndef SETTINGS_HPP
 #define SETTINGS_HPP
 #include <optional>
+#include <nlohmann/json.hpp>
 #include "enums.hpp"
 
 namespace models
@@ -14,6 +15,11 @@ namespace models
         std::optional< int > height;
         std::optional< double > scale;
     };
+
+    void to_json(nlohmann::json& j, const GenerationSettingsRequest& s)
+    {
+
+    }
 
     struct GenerationSettingsResponse
     {

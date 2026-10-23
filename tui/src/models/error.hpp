@@ -1,6 +1,7 @@
 #ifndef ERROR_HPP
 #define ERROR_HPP
 #include <string>
+#include <nlohmann/json.hpp>
 
 namespace models
 {
@@ -8,6 +9,11 @@ namespace models
     {
         std::string message;
     };
+
+    void from_json(const nlohmann::json& j, ApiError& e)
+    {
+        e.message = j.at("error").at("message").get< std::string >();
+    }
 }
 
 #endif

@@ -24,7 +24,7 @@ namespace models
         std::optional< std::string > next;
     };
 
-    struct CreateImagesRequest
+    struct CreateImageRequest
     {
         int seed; 
         std::string name;
