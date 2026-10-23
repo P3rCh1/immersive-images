@@ -13,7 +13,7 @@ namespace api
         bool checkHealth();
 
         models::ImageMeta createImage(const models::CreateImageRequest&);
-        models::ListImagesResponse listImages(int limit, const std::string& start_uuid);
+        models::ListImagesResponse listImages(int limit = 1, const std::string& start_uuid = "");
         models::ImageMeta getImage(const std::string& uuid);
         models::ImageMeta updateImage(const std::string& uuid, const models::UpdateImageRequest&);
         void deleteImage(const std::string& uuid);
