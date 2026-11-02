@@ -17,7 +17,7 @@ namespace models
         GenerationSettingsResponse settings;
     };
 
-    void from_json(const nlohmann::json& j, ImageMeta& m)
+    inline void from_json(const nlohmann::json& j, ImageMeta& m)
     {
         m.uuid = j.at("uuid").get< std::string >();
         m.name = j.at("name").get< std::string >();
@@ -34,7 +34,7 @@ namespace models
         std::optional< std::string > next;
     };
 
-    void from_json(const nlohmann::json& j, ListImagesResponse& res)
+    inline void from_json(const nlohmann::json& j, ListImagesResponse& res)
     {
         res.items = j.at("items").get< std::vector< ImageMeta > >();
         res.total = j.at("total").get< int >();
@@ -53,7 +53,7 @@ namespace models
         std::optional< GenerationSettingsRequest > settings;
     };
 
-    void to_json(nlohmann::json& j, const CreateImageRequest& r)
+    inline void to_json(nlohmann::json& j, const CreateImageRequest& r)
     {
         j = nlohmann::json {
             { "seed", r.seed },
@@ -71,7 +71,7 @@ namespace models
         std::string name;
     };
 
-    void to_json(nlohmann::json& j, const UpdateImageRequest& r)
+    inline void to_json(nlohmann::json& j, const UpdateImageRequest& r)
     {
         j = nlohmann::json({ "name", r.name });
     }

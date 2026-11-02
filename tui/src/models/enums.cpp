@@ -1,9 +1,10 @@
 #include "enums.hpp"
 #include <stdexcept>
 
-namespace models {
+namespace models 
+{
 
-    Geometry stringToGeometry(const std::string& str) 
+    Geometry strToGeometry(const std::string& str) 
     {
         if (str == "PATCHES") return Geometry::PATCHES;
         if (str == "SPOTS") return Geometry::SPOTS;
@@ -15,7 +16,7 @@ namespace models {
         throw std::invalid_argument("Unknown Geometry: " + str);
     }
 
-    Palette stringToPalette(const std::string& str)
+    Palette strToPalette(const std::string& str)
     {
         if (str == "NEON") return Palette::NEON;
         if (str == "DARK") return Palette::DARK;
@@ -28,7 +29,7 @@ namespace models {
         throw std::invalid_argument("Unknown Palette: " + str);
     }
 
-    Additional stringToAdditional(const std::string& str) 
+    Additional strToAdditional(const std::string& str) 
     {
         if (str == "PIXEL") return Additional::PIXEL;
         if (str == "BLUR") return Additional::BLUR;
@@ -36,7 +37,7 @@ namespace models {
         throw std::invalid_argument("Unknown Additional: " + str);
     }
 
-    std::string geometryToString(Geometry g) 
+    std::string geometryToStr(const Geometry& g) 
     {
         switch (g) 
         {
@@ -51,7 +52,7 @@ namespace models {
         return "";
     }
 
-    std::string paletteToString(Palette p) 
+    std::string paletteToStr(const Palette& p) 
     {
         switch (p) 
         {
@@ -67,14 +68,14 @@ namespace models {
         return "";
     }
 
-    std::string additionalToString(Additional a) 
+    std::string additionalToStr(const Additional& a) 
     {
         switch (a) 
         {
         case Additional::PIXEL: return "PIXEL";
         case Additional::BLUR: return "BLUR";
         }
-        
+
         return "";
     }
 }

@@ -10,7 +10,7 @@ namespace models
         std::string message;
     };
 
-    void from_json(const nlohmann::json& j, ApiError& e)
+    inline void from_json(const nlohmann::json& j, ApiError& e)
     {
         e.message = j.at("error").at("message").get< std::string >();
     }

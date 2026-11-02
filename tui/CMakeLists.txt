@@ -31,9 +31,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(cpr)
 
-file(GLOB_RECURSE SOURCES "src/*.cpp")
-add_executable(tui_client ${SOURCES})
-
 target_link_libraries(tui_client PRIVATE
     ftxui::screen
     ftxui::dom

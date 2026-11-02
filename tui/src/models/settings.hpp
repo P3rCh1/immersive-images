@@ -16,7 +16,7 @@ namespace models
         std::optional< double > scale;
     };
 
-    void to_json(nlohmann::json& j, const GenerationSettingsRequest& s)
+    inline void to_json(nlohmann::json& j, const GenerationSettingsRequest& s)
     {
         j = nlohmann::json::object();
 
@@ -38,7 +38,7 @@ namespace models
         double scale;
     };
 
-    void from_json(const nlohmann::json& j, GenerationSettingsResponse& s)
+    inline void from_json(const nlohmann::json& j, GenerationSettingsResponse& s)
     {
         s.style = strToGeometry(j.at("style").get< std::string >());
         s.palette = strToPalette(j.at("palette").get< std::string >());
