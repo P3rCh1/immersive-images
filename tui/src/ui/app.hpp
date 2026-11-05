@@ -1,11 +1,21 @@
 #ifndef APP_HPP
 #define APP_HPP
-#include <ftxui/component/screen_interactive.hpp>
+
 #include <ftxui/component/component.hpp>
+#include <ftxui/component/screen_interactive.hpp>
+#include <vector>
+#include <string>
 #include "../api_client.hpp"
 
 namespace ui
 {
+    enum class Screen
+    {
+        List,
+        Details,
+        Error
+    };
+
     class App
     {
     public:
@@ -14,18 +24,25 @@ namespace ui
 
     private:
         api::ApiClient& client_;
-
-        std::vector< models::ImageMeta > images_;
-        std::vector< std::string > display_items_;
+        Screen current_screen_ = Screen::List;
+        std::string selected_uuid_ = "";
+        std::string error_text_ = "";
+        
+        std::vector<models::ImageMeta> images_;
+        std::vector<std::string> display_items_;
         int selected_index_ = 0;
-
+        
         ftxui::Component menu_;
-        ftxui::Component btn_refresh_;
-        ftxui::Component btn_create_;
-        ftxui::Component btn_quit_;
-        ftxui::Component main_container_;
+        ftxui::Component list_container_;
+        ftxui::Component details_container_;
 
         void loadImages();
+        void deleteImage();
+        void initComponents(ftxui::ScreenInteractive& screen);
+
+        ftxui::Element renderListScreen();
+        ftxui::Element renderDetailsScreen();
+        ftxui::Element renderErrorScreen();
     };
 }
 
