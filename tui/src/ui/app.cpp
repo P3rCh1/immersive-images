@@ -1,6 +1,7 @@
 #include "app.hpp"
 #include <ftxui/dom/elements.hpp>
 #include <iostream>
+#include <random>
 
 namespace ui
 {
@@ -58,10 +59,44 @@ namespace ui
         }
     }
 
+    void App::createImage()
+    {
+        if (new_name_.empty())
+        {
+            error_text_ = "Имя не может быть пустым!";
+            current_screen_ = Screen::Error;
+            return;
+        }
+
+        try
+        {
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_int_distribution< uint32_t > dis(0, 4294967295);
+            uint32_t seed = dis(gen);
+
+            models::CreateImageRequest req;
+            req.seed = seed;
+            req.name = new_name_;
+
+            client_.createImage(req);
+
+            new_name_ = "";
+            loadImages();
+            current_screen_ = Screen::List;
+        }
+        catch(const std::exception& e)
+        {
+            error_text_ = e.what();
+            current_screen_ = Screen::Error;
+        }
+        
+    }
+
     void App::initComponents(ScreenInteractive& screen)
     {
         auto btn_refresh = Button(" Обновить (R) ", [&] { loadImages(); });
-        auto btn_create  = Button(" Создать (N) ", [&] { /* TODO */ });
+        auto btn_create  = Button(" Создать (N) ", [&] { current_screen_ = Screen::Create; });
         auto btn_quit    = Button(" Выход (Q) ", [&screen] { screen.Exit(); });
         
         auto list_buttons = Container::Horizontal({ btn_refresh, btn_create, btn_quit });
@@ -72,6 +107,17 @@ namespace ui
         
         auto details_buttons = Container::Horizontal({ btn_back, btn_delete });
         details_container_ = Container::Vertical({ details_buttons });
+
+        input_name_ = Input(&new_name_, "Введите название картинки...");
+        btn_generate_ = Button(" Сгенерировать ", [&]{ createImage (); });
+        auto btn_cancel = Button(" Отмена (ESC) ", [&]
+            {
+                new_name_ = "";
+                current_screen_ = Screen::List;
+            });
+
+        auto create_buttons = Container::Horizontal({ btn_generate_, btn_cancel });
+        create_container_ = Container::Vertical({ input_name_, create_buttons });
     }
 
 
@@ -112,6 +158,20 @@ namespace ui
         }) | border;
     }
 
+    Element App::renderCreateScreen()
+    {
+        return vbox({
+            text(" СОЗДАНИЕ ИЗОБРАЖЕНИЯ ") | bold | center,
+            separator(),
+            text( "Введите название: ") | center,
+            create_container_->ChildAt(0)->Render() | border | center, 
+            separator(),
+            create_container_->ChildAt(1)->Render(),
+            separator(),
+            text(" Сид ") | dim | center
+        }) | border;
+    }
+
     Element App::renderErrorScreen()
     {
         return vbox({
@@ -127,21 +187,17 @@ namespace ui
     {
         initComponents(screen);
 
-        auto tab = Container::Tab({ list_container_, details_container_ }, (int*)&current_screen_);
+        auto tab = Container::Tab({ list_container_, details_container_, create_container_ }, (int*)&current_screen_);
 
         auto renderer = Renderer(tab, [&] 
         {
-            if (current_screen_ == Screen::List)
+            switch (current_screen_)
             {
-                return renderListScreen();
-            }
-            else if (current_screen_ == Screen::Details)
-            {
-                return renderDetailsScreen();
-            }
-            else
-            {
-                return renderErrorScreen();
+                case Screen::List: return renderListScreen();
+                case Screen::Details: return renderDetailsScreen();
+                case Screen::Create: return renderCreateScreen();
+                case Screen::Error: return renderErrorScreen();
+                default: return text("Ошибка") | center;
             }
         });
 
@@ -166,6 +222,12 @@ namespace ui
                     return true;
                 }
                 
+                if (event == Event::Character('n') || event == Event::Character('N'))
+                {
+                    current_screen_ = Screen::Create;
+                    return true;
+                }
+
                 if (event == Event::Return && menu_->Focused() && !images_.empty())
                 {
                     selected_uuid_ = images_[selected_index_].uuid;
@@ -178,12 +240,13 @@ namespace ui
                 if (event == Event::Escape) { current_screen_ = Screen::List; return true; }
                 if (event == Event::Delete) { deleteImage(); return true; }
             }
-            else if (current_screen_ == Screen::Error)
+            else if (current_screen_ == Screen::Create || current_screen_ == Screen::Error)
             {
-                if (event == Event::Escape) 
-                { 
-                    current_screen_ = Screen::List; 
-                    return true; 
+                if (event == Event::Escape)
+                {
+                    new_name_ = "";
+                    current_screen_ = Screen::List;
+                    return true;
                 }
             }
             return false;

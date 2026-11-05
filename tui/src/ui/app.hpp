@@ -13,6 +13,7 @@ namespace ui
     {
         List,
         Details,
+        Create,
         Error
     };
 
@@ -35,14 +36,21 @@ namespace ui
         ftxui::Component menu_;
         ftxui::Component list_container_;
         ftxui::Component details_container_;
+        ftxui::Component create_container_;
 
-        void loadImages();
-        void deleteImage();
-        void initComponents(ftxui::ScreenInteractive& screen);
+        std::string new_name_;
+        ftxui::Component input_name_;
+        ftxui::Component btn_generate_;
 
         ftxui::Element renderListScreen();
         ftxui::Element renderDetailsScreen();
+        ftxui::Element renderCreateScreen();
         ftxui::Element renderErrorScreen();
+
+        void loadImages();
+        void deleteImage();
+        void createImage();
+        void initComponents(ftxui::ScreenInteractive& screen);
     };
 }
 
