@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include "../api_client.hpp"
+#include "../utils/mouse_tracker.hpp"
 
 namespace ui
 {
@@ -47,10 +48,13 @@ namespace ui
         ftxui::Element renderCreateScreen();
         ftxui::Element renderErrorScreen();
 
+        utils::MouseTracker mouse_tracker_;
+
         void loadImages();
         void deleteImage();
         void createImage();
         void initComponents(ftxui::ScreenInteractive& screen);
+        void openImage(const std::string& uuid);
     };
 }
 

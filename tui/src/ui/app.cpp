@@ -2,6 +2,8 @@
 #include <ftxui/dom/elements.hpp>
 #include <iostream>
 #include <random>
+#include <cstdlib>
+#include <fstream>
 
 namespace ui
 {
@@ -70,10 +72,7 @@ namespace ui
 
         try
         {
-            std::random_device rd;
-            std::mt19937 gen(rd());
-            std::uniform_int_distribution< uint32_t > dis(0, 4294967295);
-            uint32_t seed = dis(gen);
+            uint32_t seed = mouse_tracker_.getSeed();
 
             models::CreateImageRequest req;
             req.seed = seed;
@@ -82,6 +81,7 @@ namespace ui
             client_.createImage(req);
 
             new_name_ = "";
+            mouse_tracker_.clear();
             loadImages();
             current_screen_ = Screen::List;
         }
@@ -166,6 +166,10 @@ namespace ui
             text( "Введите название: ") | center,
             create_container_->ChildAt(0)->Render() | border | center, 
             separator(),
+            text(" Водите мышью в этой области для генерации сида: ") | center | dim,
+            text(" Собрано точек: " + std::to_string(mouse_tracker_.size()) + " ") | center,
+            text(" Текущий сид: " + std::to_string(mouse_tracker_.getSeed()) + " ") | center | color(Color::Green),
+            separator(),
             create_container_->ChildAt(1)->Render(),
             separator(),
             text(" Сид ") | dim | center
@@ -203,6 +207,15 @@ namespace ui
 
         return CatchEvent(renderer, [&](Event event)
         {
+            if (current_screen_ == Screen::Create && event.is_mouse())
+            {
+                if (event.mouse().motion)
+                {
+                    mouse_tracker_.addPoint(event.mouse().x, event.mouse().y);
+                    return true; 
+                }
+            }
+
             if (event.is_mouse() || event == Event::ArrowUp || event == Event::ArrowDown || event == Event::Tab)
             {
                 return false;
