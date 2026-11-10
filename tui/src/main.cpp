@@ -1,5 +1,6 @@
 #include "ui/app.hpp"
 #include <ftxui/component/screen_interactive.hpp>
+#include <iostream>
 
 int main()
 {

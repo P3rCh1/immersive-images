@@ -1,20 +1,25 @@
 #ifndef MOUSE_TRACKER_HPP
 #define MOUSE_TRACKER_HPP
+
+#include <cstddef>
 #include <cstdint>
-#include <vector>
+#include <deque>
+#include <utility>
 
 namespace utils
 {
     class MouseTracker
     {
     public:
+        static constexpr std::size_t kMaxPoints = 500;
+
         void addPoint(int x, int y);
         uint32_t getSeed() const;
         void clear();
-        size_t size() const;
+        std::size_t size() const;
 
     private:
-        std::vector< std::pair< int, int > > points_;
+        std::deque< std::pair< int, int > > points_;
     };
 }
 

@@ -1,17 +1,21 @@
 #include "mouse_tracker.hpp"
-#include <functional>
-#include <string>
-#include <sstream>
 
 namespace utils
 {
     void MouseTracker::addPoint(int x, int y)
     {
-        if (points_.size() >= 100)
+        const std::pair< int, int > p{ x, y };
+
+        if (!points_.empty() && points_.back() == p)
         {
-            points_.erase(points_.begin());
-            points_.push_back({ x, y });
+            return;
         }
+
+        if (points_.size() >= kMaxPoints)
+        {
+            points_.pop_front();
+        }
+        points_.push_back(p);
     }
 
     uint32_t MouseTracker::getSeed() const
@@ -21,18 +25,23 @@ namespace utils
             return 12345;
         }
 
-        std::stringstream ss;
+        uint32_t h = 2166136261u;
+        auto mix = [&h](uint32_t v)
+        {
+            for (int i = 0; i < 4; ++i)
+            {
+                h ^= (v >> (8 * i)) & 0xFFu;
+                h *= 16777619u;
+            }
+        };
+
         for (const auto& p : points_)
         {
-            ss << p.first << "," << p.second << ";";
+            mix(static_cast< uint32_t >(p.first));
+            mix(static_cast< uint32_t >(p.second));
         }
 
-        std::hash< std::string > hasher;
-        size_t hash = hasher(ss.str());
-
-        uint32_t seed = static_cast< uint32_t >(hash & 0xFFFFFFFF);
-
-        return seed == 0 ? 1 : seed;
+        return h == 0 ? 1 : h;
     }
 
     void MouseTracker::clear()
@@ -40,7 +49,7 @@ namespace utils
         points_.clear();
     }
 
-    size_t MouseTracker::size() const
+    std::size_t MouseTracker::size() const
     {
         return points_.size();
     }

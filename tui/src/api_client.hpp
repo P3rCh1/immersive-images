@@ -22,8 +22,6 @@ namespace api
     private:
         std::string base_url_;
         std::string extractError(const std::string& response_body, int status_code);
-
-        void deleteImg(const std::string& uuid);
     };
 }
 
