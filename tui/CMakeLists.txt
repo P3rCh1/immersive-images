@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(FetchContent)
+target_include_directories(tui_client PRIVATE src)
 
 FetchContent_Declare(
     ftxui

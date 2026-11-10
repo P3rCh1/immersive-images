@@ -5,8 +5,8 @@
 #include <ftxui/component/screen_interactive.hpp>
 #include <string>
 #include <vector>
-#include "../api_client.hpp"
-#include "../utils/mouse_tracker.hpp"
+#include "api_client.hpp"
+#include "utils/mouse_tracker.hpp"
 
 namespace ui
 {
@@ -26,7 +26,7 @@ namespace ui
 
     private:
         api::ApiClient& client_;
-        int screen_index_ = static_cast<int>(Screen::List); // индекс для Container::Tab
+        int screen_index_ = static_cast<int>(Screen::List); 
         std::string selected_uuid_ = "";
         std::string error_text_ = "";
         std::string status_text_ = "";

@@ -8,6 +8,8 @@
 
 namespace utils
 {
+    constexpr std::size_t kMinMousePoints = 20;
+
     class MouseTracker
     {
     public:

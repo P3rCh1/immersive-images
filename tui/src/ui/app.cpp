@@ -2,7 +2,6 @@
 #include <ftxui/component/event.hpp>
 #include <ftxui/component/mouse.hpp>
 #include <ftxui/dom/elements.hpp>
-
 #include <algorithm>
 #include <cctype>
 #include <chrono>
@@ -11,80 +10,8 @@
 #include <fstream>
 #include <functional>
 #include <stdexcept>
-
-namespace
-{
-    constexpr std::size_t kMinMousePoints = 20;
-
-    std::string sanitizeFileName(const std::string& s)
-    {
-        std::string r;
-        for (unsigned char c : s)
-        {
-            if (std::isalnum(c) || c == '-' || c == '_')
-            {
-                r.push_back(static_cast<char>(c));
-            }
-        }
-        return r.empty() ? "image" : r;
-    }
-
-#if !defined(_WIN32)
-    std::string shellQuote(const std::string& s)
-    {
-        std::string r = "'";
-        for (char c : s)
-        {
-            if (c == '\'') r += "'\\''";
-            else r += c;
-        }
-        r += "'";
-        return r;
-    }
-
-    bool isWsl()
-    {
-#if defined(__linux__)
-        std::ifstream f("/proc/version");
-        std::string line;
-        std::getline(f, line);
-        std::transform(line.begin(), line.end(), line.begin(),
-                       [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-        return line.find("microsoft") != std::string::npos ||
-               line.find("wsl") != std::string::npos;
-#else
-        return false;
-#endif
-    }
-#endif
-
-    void openWithSystemViewer(const std::filesystem::path& file)
-    {
-#if defined(_WIN32)
-        std::filesystem::path p = file;
-        p.make_preferred();
-        std::string cmd = "start \"\" \"" + p.string() + "\"";
-        std::system(cmd.c_str());
-#elif defined(__APPLE__)
-        std::string cmd = "open " + shellQuote(file.string()) + " </dev/null >/dev/null 2>&1 &";
-        std::system(cmd.c_str());
-#else
-        const std::string q = shellQuote(file.string());
-        std::string cmd;
-        if (isWsl())
-        {
-            cmd = "( if command -v explorer.exe >/dev/null 2>&1; then "
-                  "explorer.exe \"$(wslpath -w " + q + ")\"; "
-                  "else xdg-open " + q + "; fi ) </dev/null >/dev/null 2>&1 &";
-        }
-        else
-        {
-            cmd = "( xdg-open " + q + " || gio open " + q + " ) </dev/null >/dev/null 2>&1 &";
-        }
-        std::system(cmd.c_str());
-#endif
-    }
-}
+#include "utils/platform_utils.hpp"
+#include "utils/mouse_tracker.hpp"
 
 namespace ui
 {
@@ -155,7 +82,7 @@ namespace ui
         try
         {
             uint32_t seed = mouse_.getSeed();
-            if (mouse_.size() < kMinMousePoints)
+            if (mouse_.size() < utils::kMinMousePoints)
             {
                 seed ^= static_cast<uint32_t>(std::hash<std::string>{}(new_name_));
                 seed ^= static_cast<uint32_t>(
@@ -189,7 +116,7 @@ namespace ui
 
             std::filesystem::path path =
                 std::filesystem::temp_directory_path() /
-                ("image_" + sanitizeFileName(uuid) + ".png");
+                ("image_" + utils::sanitizeFileName(uuid) + ".png");
 
             {
                 std::ofstream file(path, std::ios::binary);
@@ -197,7 +124,7 @@ namespace ui
                 file.write(image_data.data(), static_cast<std::streamsize>(image_data.size()));
             }
 
-            openWithSystemViewer(path);
+            utils::openWithSystemViewer(path);
             status_text_ = "Файл: " + path.string();
         }
         catch (const std::exception& e)
@@ -302,7 +229,7 @@ namespace ui
     {
         const std::size_t n = mouse_.size();
         const std::size_t max = utils::MouseTracker::kMaxPoints;
-        const bool enough = n >= kMinMousePoints;
+        const bool enough = n >= utils::kMinMousePoints;
 
         return vbox({
             text(" СОЗДАНИЕ ИЗОБРАЖЕНИЯ ") | bold | center,
@@ -320,7 +247,7 @@ namespace ui
             create_container_->ChildAt(1)->Render() | center,
             separator(),
             text(enough ? " Сид готов. " : " Подвигайте мышью (минимум " +
-                 std::to_string(kMinMousePoints) + " точек). ") | dim | center
+                 std::to_string(utils::kMinMousePoints) + " точек). ") | dim | center
         }) | border;
     }
 
