@@ -7,7 +7,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(FetchContent)
-target_include_directories(tui_client PRIVATE src)
 
 FetchContent_Declare(
     ftxui
@@ -35,6 +34,7 @@ FetchContent_MakeAvailable(cpr)
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 
 add_executable(tui_client ${SOURCES})
+target_include_directories(tui_client PRIVATE src)
 
 target_link_libraries(tui_client PRIVATE
     ftxui::screen
