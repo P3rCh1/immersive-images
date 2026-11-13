@@ -10,24 +10,24 @@ include(FetchContent)
 
 FetchContent_Declare(
     ftxui
-    GIT_REPOSITORY https://github.com/ArthurSonzogni/FTXUI.git
-    GIT_TAG v6.0.0
+    URL https://codeload.github.com/ArthurSonzogni/FTXUI/tar.gz/refs/tags/v6.0.0
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
 FetchContent_MakeAvailable(ftxui)
 
 FetchContent_Declare(
     json
-    GIT_REPOSITORY https://github.com/nlohmann/json.git
-    GIT_TAG v3.11.3
+    URL https://codeload.github.com/nlohmann/json/tar.gz/refs/tags/v3.11.3
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
 FetchContent_MakeAvailable(json)
 
-set(CPR_FORCE_USE_SYSTEM_CURL ON CACHE BOOL "Use system curl" FORCE)
+set(CPR_USE_SYSTEM_CURL ON CACHE BOOL "Use system curl" FORCE)
 
 FetchContent_Declare(
     cpr
-    GIT_REPOSITORY https://github.com/libcpr/cpr.git
-    GIT_TAG 1.10.5
+    URL https://codeload.github.com/libcpr/cpr/tar.gz/refs/tags/1.10.5
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
 FetchContent_MakeAvailable(cpr)
 
