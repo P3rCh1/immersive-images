@@ -1,1 +1,14 @@
 .env
+build/
+_deps/
+*.o
+*.a
+*.so
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+__pycache__/
+*.pyc
+.vscode/
+.idea/
+.vscode/
