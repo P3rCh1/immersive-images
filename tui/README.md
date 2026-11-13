@@ -5,4 +5,4 @@ cd immersive-images/tui
 cmake -B build
 cmake --build build -j$(nproc)
 
-API_URL="http://localhost:8080" ./build/tui_client
+API_URL="http://localhost:8080/v1" ./build/tui_client
