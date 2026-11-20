@@ -45,12 +45,28 @@ namespace api
 
     models::ImageMeta ApiClient::createImage(const models::CreateImageRequest& req)
     {
-        std::string json_body = json(req).dump();
+        nlohmann::json body_json = {
+            {"seed", req.seed},
+            {"name", req.name}
+        };
+
+        if (req.settings.has_value())
+        {
+            nlohmann::json s;
+            if (req.settings->style) s["style"] = models::geometryToStr(*req.settings->style);
+            if (req.settings->palette) s["palette"] = models::paletteToStr(*req.settings->palette);
+            if (req.settings->additional) s["additional"] = models::additionalToStr(*req.settings->additional);
+            if (req.settings->width) s["width"] = *req.settings->width;
+            if (req.settings->height) s["height"] = *req.settings->height;
+            if (req.settings->scale) s["scale"] = *req.settings->scale;
+
+            body_json["settings"] = s;
+        }
 
         auto r = cpr::Post(
             cpr::Url{ base_url_ + "/images" },
             cpr::Header{ { "Content-Type", "application/json" } },
-            cpr::Body{ json_body },
+            cpr::Body{ body_json.dump() },
             cpr::Timeout{ 60000 }
         );
 
