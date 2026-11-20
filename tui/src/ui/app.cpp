@@ -94,6 +94,19 @@ namespace ui
             req.seed = seed;
             req.name = new_name_;
 
+            models::GenerationSettingsRequest settings;
+            settings.style = models::strToGeometry(styles_[style_idx_]);
+            settings.palette = models::strToPalette(palettes_[pal_idx_]);
+            if (add_idx_ > 0) {
+                settings.additional = models::strToAdditional(additionals_[add_idx_]);
+            }
+            
+            try { settings.width = std::stoi(width_str_); } catch(...) { settings.width = 512; }
+            try { settings.height = std::stoi(height_str_); } catch(...) { settings.height = 512; }
+            try { settings.scale = std::stod(scale_str_); } catch(...) { settings.scale = 1.0; }
+
+            req.settings = settings;
+
             client_.createImage(req);
 
             new_name_.clear();
@@ -169,7 +182,15 @@ namespace ui
         auto details_buttons = Container::Horizontal({ btn_back, btn_open, btn_delete });
         details_container_ = Container::Vertical({ details_buttons });
 
-        input_name_ = Input(&new_name_, "Введите название (сид создастся от движения мыши)...");
+        input_name_ = Input(&new_name_, "Введите название...");
+        
+        dropdown_style_ = Dropdown(&styles_, &style_idx_);
+        dropdown_palette_ = Dropdown(&palettes_, &pal_idx_);
+        dropdown_additional_ = Dropdown(&additionals_, &add_idx_);
+        
+        input_width_ = Input(&width_str_, "Ширина");
+        input_height_ = Input(&height_str_, "Высота");
+        input_scale_ = Input(&scale_str_, "Масштаб");
 
         btn_generate_ = Button(" Сгенерировать ", [this] { createImage(); });
         auto btn_cancel = Button(" Отмена (ESC) ", [this] {
@@ -179,7 +200,17 @@ namespace ui
         });
 
         auto create_buttons = Container::Horizontal({ btn_generate_, btn_cancel });
-        create_container_ = Container::Vertical({ input_name_, create_buttons });
+        
+        create_container_ = Container::Vertical({ 
+            input_name_, 
+            dropdown_style_,
+            dropdown_palette_,
+            dropdown_additional_,
+            input_width_,
+            input_height_,
+            input_scale_,
+            create_buttons 
+        });
 
         auto btn_error_ok = Button(" Понятно (OK) ", [this] { setScreen(Screen::List); });
         auto error_buttons = Container::Horizontal({ btn_error_ok });
@@ -235,8 +266,25 @@ namespace ui
             text(" СОЗДАНИЕ ИЗОБРАЖЕНИЯ ") | bold | center,
             separator(),
             text(" Введите название: ") | center,
-            create_container_->ChildAt(0)->Render() | border | center,
+            input_name_->Render() | border | center,
             separator(),
+            
+            text(" Настройки: ") | center,
+            hbox({
+                vbox({ text(" Стиль "), dropdown_style_->Render() | border }),
+                vbox({ text(" Палитра "), dropdown_palette_->Render() | border }),
+                vbox({ text(" Эффект "), dropdown_additional_->Render() | border }),
+            }) | center,
+            separator(),
+
+            text(" Размеры: ") | center,
+            hbox({
+                vbox({ text(" Ширина "), input_width_->Render() | border }),
+                vbox({ text(" Высота "), input_height_->Render() | border }),
+                vbox({ text(" Масштаб "), input_scale_->Render() | border }),
+            }) | center,
+            separator(),
+
             text(" Водите мышью по экрану - так создаётся сид ") | center,
             hbox({
                 text(" Движений: " + std::to_string(n) + "/" + std::to_string(max) + " "),
@@ -244,9 +292,10 @@ namespace ui
                     | color(enough ? Color::Green : Color::Yellow),
             }) | border,
             separator(),
-            create_container_->ChildAt(1)->Render() | center,
+
+            create_container_->ChildAt(7)->Render() | center, 
             separator(),
-            text(enough ? " Сид готов. " : " Подвигайте мышью (минимум " +
+            text(enough ? " Сид готов. " : " Подвигайте мышью (минимум " + 
                  std::to_string(utils::kMinMousePoints) + " точек). ") | dim | center
         }) | border;
     }
@@ -313,25 +362,13 @@ namespace ui
             }
             else if (s == Screen::Details) 
             {
-                if (event == Event::Escape) 
-                { 
-                    setScreen(Screen::List); return true; 
-                }
-                if (event == Event::Delete) 
-                { 
-                    deleteImage(); return true; 
-                }
-                if (event == Event::Character('o') || event == Event::Character('O')) 
-                {
-                    openImage(selected_uuid_); return true;
-                }
+                if (event == Event::Escape) { setScreen(Screen::List); return true; }
+                if (event == Event::Delete) { deleteImage(); return true; }
+                if (event == Event::Character('o') || event == Event::Character('O')) { openImage(selected_uuid_); return true; }
             }
             else if (s == Screen::Create) 
             {
-                if (event == Event::Escape) 
-                {
-                    new_name_.clear(); mouse_.clear(); setScreen(Screen::List); return true;
-                }
+                if (event == Event::Escape) { new_name_.clear(); mouse_.clear(); setScreen(Screen::List); return true; }
             }
             else if (s == Screen::Error) 
             {
