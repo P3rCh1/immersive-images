@@ -22,7 +22,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(json)
 
-set(CPR_FORCE_USE_SYSTEM_CURL ON CACHE BOOL "Use system curl" FORCE)
+set(CPR_USE_SYSTEM_CURL ON CACHE BOOL "Use system curl" FORCE)
 
 FetchContent_Declare(
     cpr
