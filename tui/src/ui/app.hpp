@@ -47,6 +47,25 @@ namespace ui
         ftxui::Component input_name_;
         ftxui::Component btn_generate_;
 
+        std::vector<std::string> styles_ = {"PATCHES", "SPOTS", "RINGS", "TERRACES", "WAVES", "MOTTLED"};
+        std::vector<std::string> palettes_ = {"NEON", "DARK", "TOXIC", "RAINBOW", "OCEAN", "LAVA", "MONO"};
+        std::vector<std::string> additionals_ = {"NONE", "PIXEL", "BLUR"};
+        
+        int style_idx_ = 0;
+        int pal_idx_ = 0;
+        int add_idx_ = 0;
+
+        std::string width_str_ = "512";
+        std::string height_str_ = "512";
+        std::string scale_str_ = "1.0";
+
+        ftxui::Component dropdown_style_;
+        ftxui::Component dropdown_palette_;
+        ftxui::Component dropdown_additional_;
+        ftxui::Component input_width_;
+        ftxui::Component input_height_;
+        ftxui::Component input_scale_;
+
         Screen screen() const { return static_cast<Screen>(screen_index_); }
         void setScreen(Screen s) { screen_index_ = static_cast<int>(s); }
 
@@ -65,4 +84,4 @@ namespace ui
     };
 }
 
-#endif  
+#endif
