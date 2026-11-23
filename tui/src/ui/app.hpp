@@ -29,6 +29,7 @@ namespace ui
         int screen_index_ = static_cast<int>(Screen::List); 
         std::string selected_uuid_ = "";
         std::string error_text_ = "";
+        bool is_from_set_ = false;
         std::string status_text_ = "";
 
         std::vector<models::ImageMeta> images_;
