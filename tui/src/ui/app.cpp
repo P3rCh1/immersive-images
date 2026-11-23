@@ -113,6 +113,13 @@ namespace ui
 
             new_name_.clear();
             mouse_.clear();
+            width_str_ = "512";
+            height_str_ = "512";
+            scale_str_ = "1.0";
+            style_idx_ = 0;
+            pal_idx_ = 0;
+            add_idx_ = 0;
+            
             loadImages();
             setScreen(Screen::List);
         }
