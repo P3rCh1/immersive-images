@@ -12,6 +12,7 @@
 #include <stdexcept>
 #include "utils/platform_utils.hpp"
 #include "utils/mouse_tracker.hpp"
+#include "utils/parse_utils.hpp"
 
 namespace ui
 {
@@ -75,6 +76,7 @@ namespace ui
         if (new_name_.empty())
         {
             error_text_ = "Имя не может быть пустым!";
+            is_from_set_ = true;
             setScreen(Screen::Error);
             return;
         }
@@ -101,9 +103,9 @@ namespace ui
                 settings.additional = models::strToAdditional(additionals_[add_idx_]);
             }
             
-            try { settings.width = std::stoi(width_str_); } catch(...) { settings.width = 512; }
-            try { settings.height = std::stoi(height_str_); } catch(...) { settings.height = 512; }
-            try { settings.scale = std::stod(scale_str_); } catch(...) { settings.scale = 1.0; }
+            settings.width = utils::strict_stoi(width_str_);
+            settings.height = utils::strict_stoi(height_str_);
+            settings.scale = utils::strict_stod(scale_str_);
 
             req.settings = settings;
 
@@ -117,6 +119,7 @@ namespace ui
         catch (const std::exception& e)
         {
             error_text_ = e.what();
+            is_from_set_ = true;
             setScreen(Screen::Error);
         }
     }
@@ -212,7 +215,17 @@ namespace ui
             create_buttons 
         });
 
-        auto btn_error_ok = Button(" Понятно (OK) ", [this] { setScreen(Screen::List); });
+        auto btn_error_ok = Button(" Понятно (OK) ", [this] { 
+            if (is_from_set_)
+            {
+                is_from_set_ = false;
+                setScreen(Screen::Create);
+            }
+            else
+            {
+                setScreen(Screen::List);    
+            }
+        });
         auto error_buttons = Container::Horizontal({ btn_error_ok });
         error_container_ = Container::Vertical({ error_buttons });
     }
@@ -372,7 +385,17 @@ namespace ui
             }
             else if (s == Screen::Error) 
             {
-                if (event == Event::Escape) { setScreen(Screen::List); return true; }
+                if (event == Event::Escape) 
+                { 
+                    if (is_from_set_)
+                    {
+                        is_from_set_ = false;
+                        setScreen(Screen::Create);
+                        return true;
+                    }
+                    setScreen(Screen::List); 
+                    return true; 
+                }
             }
             return false;
         });
